@@ -129,7 +129,11 @@ async function handlePost(request: Request, env: Env) {
   }
 
   if (url.pathname === '/api/stage-review') {
-    const prompt = strictJsonPrompt('Review this IELTS study stage and provide practical next-step diagnosis.', payload, schemas.stage);
+    const prompt = strictJsonPrompt(
+      'Review this IELTS study stage with deep learning diagnosis. Use daily completion logs plus detailed evidence from speaking logs, vocabulary test wrong words, listening new words, and reading/writing notes. Identify repeated mistakes, weakest skill patterns, and the most practical next-week or next-stage training plan. Be specific, not generic.',
+      payload,
+      schemas.stage,
+    );
     return jsonResponse(request, env, await callGemini(env, prompt));
   }
 
