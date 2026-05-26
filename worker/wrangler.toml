@@ -3,4 +3,4 @@ main = "src/index.ts"
 compatibility_date = "2024-11-18"
 
 [vars]
-ALLOWED_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173,https://YOUR_GITHUB_USERNAME.github.io"
+ALLOWED_ORIGINS = "http://localhost:5173,http://127.0.0.1:5173,https://tc260187004-cmd.github.io"
