@@ -37,7 +37,9 @@ const schemas = {
 function corsHeaders(request: Request, env: Env) {
   const origin = request.headers.get('Origin') || '';
   const allowed = (env.ALLOWED_ORIGINS || '').split(',').map((item) => item.trim()).filter(Boolean);
-  const allowOrigin = allowed.includes(origin) ? origin : origin.startsWith('http://localhost:') ? origin : '';
+  const isLocal = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+  const isGitHubPages = /^https:\/\/[a-z0-9-]+\.github\.io$/i.test(origin);
+  const allowOrigin = allowed.includes(origin) || isLocal || isGitHubPages ? origin : '';
   return {
     'Access-Control-Allow-Origin': allowOrigin || allowed[0] || 'http://localhost:5173',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -59,7 +61,9 @@ function jsonResponse(request: Request, env: Env, body: unknown, status = 200) {
 function assertAllowedOrigin(request: Request, env: Env) {
   const origin = request.headers.get('Origin') || '';
   const allowed = (env.ALLOWED_ORIGINS || '').split(',').map((item) => item.trim()).filter(Boolean);
-  if (origin.startsWith('http://localhost:')) return;
+  if (!origin) return;
+  if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return;
+  if (/^https:\/\/[a-z0-9-]+\.github\.io$/i.test(origin)) return;
   if (allowed.length && !allowed.includes(origin)) {
     throw new Error('Origin is not allowed');
   }
