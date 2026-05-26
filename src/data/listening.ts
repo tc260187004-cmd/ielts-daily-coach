@@ -317,6 +317,12 @@ const rows: Array<Omit<ListeningItem, 'tasks'>> = [
 export const listeningBank: ListeningItem[] = rows.map((item) => ({
   ...item,
   tasks: steps,
+  localScript: `Today you will practise a short IELTS-style listening task about ${item.topic.toLowerCase()}. First, listen for the main idea. Then listen again and write down three useful words or phrases. Finally, summarise the speaker's message in one clear English sentence. This training is designed for careful listening, note-taking, and spoken shadowing.`,
+  focusQuestions: [
+    'What is the main idea of the listening material?',
+    'Which three words or phrases were difficult to catch?',
+    'What is one useful sentence pattern you can reuse in IELTS?',
+  ],
 }));
 
 export function isPlaceholderListeningUrl(url: string) {

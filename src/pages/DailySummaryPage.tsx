@@ -27,6 +27,10 @@ export function DailySummaryPage() {
         supabase.from('speaking_logs').select('*').eq('user_id', user.id).eq('log_date', logDate),
         supabase.from('writing_reading_logs').select('*').eq('user_id', user.id).eq('log_date', logDate),
       ]);
+
+      const queryError = [todayLogs, listeningLogs, vocabularyLogs, speakingLogs, writingReadingLogs].find((result) => result.error)?.error;
+      if (queryError) throw queryError;
+
       const result = await aiClient.dailySummary<DailySummary>({
         profile,
         todayLogs: todayLogs.data || [],
@@ -36,13 +40,16 @@ export function DailySummaryPage() {
         writingReadingLogs: writingReadingLogs.data || [],
       });
       setSummary(result);
-      await supabase.from('daily_summaries').upsert(
+
+      const { error: saveError } = await supabase.from('daily_summaries').upsert(
         { user_id: user.id, log_date: logDate, summary: result },
         { onConflict: 'user_id,log_date' },
       );
+      if (saveError) throw saveError;
+
       await upsertDailyLog(user.id, { completedTask: 'summary' }, profile?.daily_minutes || 60);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '生成失败');
+      setError(err instanceof Error ? err.message : '生成失败，请稍后再试。');
     } finally {
       setLoading(false);
     }
@@ -50,13 +57,21 @@ export function DailySummaryPage() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-lg border border-cyan-100 bg-white p-5 shadow-soft">
+      <section className="rounded-[22px] border border-cyan-100 bg-white p-5 shadow-soft md:p-6">
         <h1 className="text-2xl font-semibold text-slate-950">今日总结</h1>
-        <p className="mt-2 text-slate-600">整理今天的学习记录，由 Gemini 生成学习亮点、问题和明日建议。</p>
-        <button onClick={generate} disabled={loading} className="focus-ring mt-4 inline-flex items-center gap-2 rounded-md bg-ocean-600 px-4 py-3 font-semibold text-white disabled:bg-slate-300">
+        <p className="mt-2 text-slate-600">整理今天的学习记录，由 Gemini 生成学习亮点、主要问题和明日建议。</p>
+        <button
+          onClick={generate}
+          disabled={loading}
+          className="focus-ring mt-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-ocean-600 to-cyan-500 px-4 py-3 font-semibold text-white shadow-soft disabled:bg-slate-300"
+        >
           <Sparkles size={18} /> {loading ? '生成中...' : '生成今日总结'}
         </button>
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {error && (
+          <div className="mt-4 rounded-2xl bg-red-50 p-4 text-sm leading-6 text-red-700">
+            {error}
+          </div>
+        )}
       </section>
       <SummaryPanel data={summary as Record<string, unknown> | null} />
     </div>

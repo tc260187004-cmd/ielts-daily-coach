@@ -41,6 +41,8 @@ export type ListeningItem = {
   difficulty: string;
   sectionType: 'Section 1' | 'Section 2' | 'Section 3' | 'Section 4' | 'General Listening';
   tasks: string[];
+  localScript?: string;
+  focusQuestions?: string[];
 };
 
 export type VocabItem = {
