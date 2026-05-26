@@ -7,6 +7,8 @@ import { todayISO } from '../lib/date';
 import { upsertDailyLog } from '../services/logs';
 import { TimerBlock } from '../components/Cards';
 
+type ListenMode = 'normal' | 'slow' | 'full';
+
 export function ListeningPage() {
   const { user, profile } = useAuth();
   const item = getTodayListening();
@@ -14,26 +16,54 @@ export function ListeningPage() {
   const [summary, setSummary] = useState('');
   const [message, setMessage] = useState('');
   const [speechMessage, setSpeechMessage] = useState('');
+  const [isPlaying, setIsPlaying] = useState(false);
   const isPlaceholder = isPlaceholderListeningUrl(item.url);
 
-  const speak = () => {
+  const getVoice = () => {
+    const voices = window.speechSynthesis.getVoices();
+    return voices.find((voice) => voice.lang === 'en-GB') || voices.find((voice) => voice.lang === 'en-US') || null;
+  };
+
+  const speakText = (text: string, rate = 0.9) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = getVoice();
+    utterance.lang = utterance.voice?.lang || 'en-GB';
+    utterance.rate = rate;
+    utterance.volume = 1;
+    utterance.onend = () => setIsPlaying(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const speak = (mode: ListenMode = 'normal') => {
     setSpeechMessage('');
     if (!('speechSynthesis' in window)) {
       setSpeechMessage('当前浏览器不支持朗读。你可以直接阅读下方内置文本。');
       return;
     }
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(item.localScript || item.title);
-    const voices = window.speechSynthesis.getVoices();
-    utterance.voice = voices.find((voice) => voice.lang === 'en-GB') || voices.find((voice) => voice.lang === 'en-US') || null;
-    utterance.lang = utterance.voice?.lang || 'en-GB';
-    utterance.rate = 0.9;
-    utterance.volume = 1;
-    window.speechSynthesis.speak(utterance);
+    setIsPlaying(true);
+
+    const script = item.localScript || item.title;
+    if (mode === 'full') {
+      const fullPractice = [
+        'Round one. Blind listening. Do not look at the text. Listen for the main idea only.',
+        script,
+        'Round two. Intensive listening. Now look at the text. Notice useful phrases, linking words, and any words you missed.',
+        script,
+        'Round three. Shadowing practice. Listen to each sentence and repeat after the speaker. Try to copy the rhythm and stress.',
+        script,
+        'Practice finished. Now write three difficult words and one English summary sentence.',
+      ].join('\n\n');
+      speakText(fullPractice, 0.86);
+      return;
+    }
+
+    speakText(script, mode === 'slow' ? 0.72 : 0.9);
   };
 
   const stopSpeaking = () => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    setIsPlaying(false);
   };
 
   useEffect(() => {
@@ -99,15 +129,29 @@ export function ListeningPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="font-semibold text-slate-900">内置精听材料</h2>
-              <p className="mt-1 text-sm text-slate-600">先用浏览器朗读完成今日练习；外部材料只是补充入口。</p>
+              <p className="mt-1 text-sm text-slate-600">建议按三轮完成：盲听抓主旨、精听看文本、跟读练节奏。</p>
             </div>
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={speak}
+                onClick={() => speak('normal')}
                 className="focus-ring inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-ocean-700 shadow-sm"
               >
-                <Volume2 size={16} /> 朗读材料
+                <Volume2 size={16} /> 单次播放
+              </button>
+              <button
+                type="button"
+                onClick={() => speak('slow')}
+                className="focus-ring inline-flex items-center gap-2 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-ocean-700 shadow-sm"
+              >
+                <Volume2 size={16} /> 慢速精听
+              </button>
+              <button
+                type="button"
+                onClick={() => speak('full')}
+                className="focus-ring inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-ocean-600 to-cyan-500 px-3 py-2 text-sm font-semibold text-white shadow-sm"
+              >
+                <Volume2 size={16} /> 15 分钟训练
               </button>
               <button
                 type="button"
@@ -118,6 +162,7 @@ export function ListeningPage() {
               </button>
             </div>
           </div>
+          {isPlaying && <p className="mt-3 text-sm font-medium text-ocean-700">正在播放。手机锁屏或切换 App 可能会中断朗读。</p>}
           <p className="mt-4 text-sm leading-7 text-slate-700">{item.localScript}</p>
           {speechMessage && <p className="mt-3 text-sm text-amber-700">{speechMessage}</p>}
         </div>

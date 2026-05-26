@@ -314,14 +314,65 @@ const rows: Array<Omit<ListeningItem, 'tasks'>> = [
   },
 ];
 
+function buildListeningScript(item: Omit<ListeningItem, 'tasks'>) {
+  if (item.sectionType === 'Section 1') {
+    return `Good morning. I would like to ask about the ${item.topic.toLowerCase()} service you mentioned on your website. I am preparing for an important exam, so I need a clear plan and a quiet place to study. Could you tell me what options are available during weekdays? 
+
+Certainly. Most students choose the standard morning session because it is less crowded and easier to concentrate. The session starts at nine thirty and finishes at eleven. If you prefer the afternoon, we also have a shorter session from two to three thirty, but that one is usually busier.
+
+That sounds useful. I am especially interested in improving my listening and speaking. Do I need to bring anything with me?
+
+Please bring a notebook, a pen, and your phone if you want to record new vocabulary. However, phones must be on silent during the main activity. At the end, you will write a short summary of what you heard and discuss it with a partner. The purpose is not to understand every single word, but to identify the speaker's main idea, important details, and useful expressions.
+
+Great. One more question. Is there a fee for joining?
+
+The first session is free. After that, you can pay for individual sessions or buy a monthly pass. If you attend regularly, the monthly pass is better value.`;
+  }
+
+  if (item.sectionType === 'Section 3') {
+    return `We need to decide how to structure our presentation on ${item.topic.toLowerCase()}. I think we should begin with the problem, then explain our research method, and finally present two practical solutions.
+
+That makes sense, but we should be careful not to make the introduction too long. In the last seminar, the tutor said our group spent too much time giving background information and not enough time analysing evidence.
+
+True. Maybe we can use one example at the beginning, such as how students manage their time when they have several deadlines in the same week. Then we can connect that example to the wider issue.
+
+I like that. For the method section, should we mention the questionnaire results first or the interviews?
+
+Let's start with the questionnaire because it gives a general picture. After that, we can use the interviews to explain why some students struggle. The tutor also reminded us to compare our findings with at least one published source.
+
+Good point. I will prepare the slide on the published source. Could you handle the final recommendation slide?
+
+Sure. I will focus on realistic advice rather than a perfect solution. For example, students could make a weekly schedule, but they also need to leave extra time for unexpected tasks. That sounds more balanced and more convincing.`;
+  }
+
+  if (item.sectionType === 'Section 4') {
+    return `Today we are going to look at a topic connected with ${item.topic.toLowerCase()}. In many academic discussions, this topic is not only about facts, but also about how people respond to change. Researchers often begin by observing a simple pattern and then asking why it happens.
+
+One important point is that behaviour is shaped by both individual choices and wider social conditions. For instance, a person may want to make a better decision, but their environment can make that decision easier or harder. This is why many modern studies combine data, interviews, and long-term observation.
+
+A second point concerns the difference between short-term results and long-term impact. A policy or habit may appear successful at first because it produces quick improvements. However, if it is too expensive, too complicated, or too difficult to maintain, the benefits may disappear over time.
+
+Finally, we should consider communication. Even strong evidence can be ignored if it is presented in a confusing way. Clear examples, precise language, and a logical structure help listeners understand the speaker's argument. When you listen to this type of lecture, do not try to write down every word. Instead, follow the structure: topic, reason, example, limitation, and conclusion.`;
+  }
+
+  return `Welcome to today's IELTS-style listening practice on ${item.topic.toLowerCase()}. In this recording, you will hear a short talk designed to train careful listening, note-taking, and spoken shadowing.
+
+The speaker begins by introducing a familiar situation. Many learners believe that good listening means understanding every word immediately. In reality, strong listeners usually focus on meaning first. They notice the topic, the speaker's purpose, repeated words, and changes in tone.
+
+The next step is to listen for details. These may include dates, prices, locations, reasons, advantages, disadvantages, or examples. If you miss one detail, do not panic. Keep listening and use the next sentence to recover the meaning.
+
+For today's practice, listen three times. During the first round, keep your eyes away from the text and write only the main idea. During the second round, look at the text and underline useful phrases. During the third round, speak after the recording and copy the rhythm of the sentence. At the end, write one English sentence summarising the material.`;
+}
+
 export const listeningBank: ListeningItem[] = rows.map((item) => ({
   ...item,
   tasks: steps,
-  localScript: `Today you will practise a short IELTS-style listening task about ${item.topic.toLowerCase()}. First, listen for the main idea. Then listen again and write down three useful words or phrases. Finally, summarise the speaker's message in one clear English sentence. This training is designed for careful listening, note-taking, and spoken shadowing.`,
+  localScript: buildListeningScript(item),
   focusQuestions: [
     'What is the main idea of the listening material?',
     'Which three words or phrases were difficult to catch?',
     'What is one useful sentence pattern you can reuse in IELTS?',
+    'Can you repeat two sentences with similar rhythm and stress?',
   ],
 }));
 
